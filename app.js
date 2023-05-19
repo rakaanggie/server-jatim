@@ -93,7 +93,7 @@ if(conn) {
             console.log(new Error(error))
         }
     } else {
-        app.listen(port, () => console.log(`Server API listen on YOUR_HOST:${env.port}`))
+        app.listen(8000, () => console.log(`Server API listen on YOUR_HOST:${env.port}`))
     }
 } else {
     console.log(`${env.host}:${env.port} cannot connect to the Database ${env.db_type}!`)
