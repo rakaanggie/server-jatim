@@ -1,6 +1,6 @@
 FROM node:12-alpine
 
-ARG NODE_ENV=development
+ARG NODE_ENV=production
 ARG PORT=8000
 
 ENV PORT=${PORT}
@@ -14,4 +14,4 @@ RUN npm install
 COPY . .
 
 EXPOSE ${PORT}
-CMD [ "npm", "run", "start" ]
+CMD [ "node", "app.js" ]
