@@ -55,7 +55,7 @@ phases:
       - echo "push image and create artifacts"
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com/$IMAGE_REPO:$IMAGE_TAG
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $ECR_REPO:$IMAGE_TAG > imagedefinitions.json
-      - printf '{"AWSEBDockerrunVersion":"1","Image":{"Name":"405040917563.dkr.ecr.us-east-1.amazonaws.com/server:latest","Update":"true"},"Ports":[{"ContainerPort":8000,"HostPort":80}]}' > Dockerrun.aws.json
+      - printf '{"AWSEBDockerrunVersion":"1","Image":{"Name":"405040917563.dkr.ecr.us-east-1.amazonaws.com/server:v1","Update":"true"},"Ports":[{"ContainerPort":8000,"HostPort":80}]}' > Dockerrun.aws.json
 
 artifacts:
   files:
