@@ -1,0 +1,63 @@
+version: 0.2
+run as: root
+
+env:
+  variables:
+    ECR_REGION: us-east-1
+    CONTAINER_NAME: lks-server-container
+    IMAGE_REPO: server
+    NODE_ENV: production
+    PORT: 8000
+    DB_TYPE: mysql
+    MYSQL_DB: db_campus
+    MYSQL_USERNAME: admin
+    MYSQL_PASSWORD: 12345678
+    MYSQL_HOST: db-campus.cluster-clqqyhrtzbj3.us-east-1.rds.amazonaws.com
+    MYSQL_PORT: 3306
+    REDIS_HOST: lks-redis.ecnaja.ng.0001.use1.cache.amazonaws.com
+    REDIS_PORT: 6379
+    REDIS_PASSWORD: 
+    AWS_BUCKET_NAME: lks-raka-jawatimur
+    LOG_PATH: /var/log
+    CACHE_PATH: /var/tmp
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+  pre_build:
+    commands:
+      - echo "create environment file and login into ECR"
+      - aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com
+      - ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com/$IMAGE_REPO
+      - echo NODE_ENV=${NODE_ENV} >> .env
+      - echo PORT=${PORT} >> .env
+      - echo DB_TYPE=${DB_TYPE} >> .env
+      - echo MYSQL_DB=${MYSQL_DB} >> .env
+      - echo MYSQL_USERNAME=${MYSQL_USERNAME} >> .env
+      - echo MYSQL_PASSWORD=${MYSQL_PASSWORD} >> .env
+      - echo MYSQL_HOST=${MYSQL_HOST} >> .env
+      - echo MYSQL_PORT=${MYSQL_PORT} >> .env
+      - echo REDIS_HOST=${REDIS_HOST} >> .env
+      - echo REDIS_PORT=${REDIS_PORT} >> .env
+      - echo REDIS_PASSWO=${REDIS_PASSWO} >> .env
+      - echo AWS_ACCESS_KEY=${AWS_ACCESS_KEY} >> .env
+      - echo AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} >> .env
+      - echo AWS_BUCKET_NAME=${AWS_BUCKET_NAME} >> .env
+      - echo LOG_PATH=${LOG_PATH} >> .env
+      - echo CACHE_PAcTH=${CACHE_PAcTH} >> .env
+  build:
+    commands:
+      - echo "build docker image"
+      - docker build -t $IMAGE_REPO:$IMAGE_TAG -f Dockerfile .
+      - docker tag $IMAGE_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com/$IMAGE_REPO:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "push image and create artifacts"
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com/$IMAGE_REPO:$IMAGE_TAG
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $ECR_REPO:$IMAGE_TAG > imagedefinitions.json
+      - printf '{"AWSEBDockerrunVersion":"1","Image":{"Name":"405040917563.dkr.ecr.us-east-1.amazonaws.com/server:latest","Update":"true"},"Ports":[{"ContainerPort":8000,"HostPort":80}]}' > Dockerrun.aws.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - Dockerrun.aws.json
